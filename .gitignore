@@ -1,0 +1,57 @@
+# data file
+*.fastq.gz
+
+*.fq.gz
+*.bam
+*.bai
+*.h5
+
+# Cell Ranger output
+outs/
+
+# Python cache
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# R environment
+.Rhistory
+.RData
+.Rproj.user/
+
+# System file
+*.swp
+*.swo
+*~
+
+# Large transient results
+cat > .gitignore << 'EOF'
+# data file
+*.fastq.gz
+
+*.fq.gz
+*.bam
+*.bai
+*.h5
+
+# Cell Ranger output
+outs/
+
+# Python cache
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# R environment
+.Rhistory
+.RData
+.Rproj.user/
+
+# System file
+*.swp
+*.swo
+*~
+
+# Large-scale intermediate results
+
+*.h5ad
