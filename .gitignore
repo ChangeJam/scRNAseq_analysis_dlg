@@ -1,6 +1,5 @@
 # data file
 *.fastq.gz
-
 *.fq.gz
 *.bam
 *.bai
@@ -19,39 +18,15 @@ __pycache__/
 .RData
 .Rproj.user/
 
-# System file
+# System/Editor files
 *.swp
 *.swo
 *~
+.DS_Store
 
-# Large transient results
-cat > .gitignore << 'EOF'
-# data file
-*.fastq.gz
-
-*.fq.gz
-*.bam
-*.bai
-*.h5
-
-# Cell Ranger output
-outs/
-
-# Python cache
-__pycache__/
-*.pyc
-.ipynb_checkpoints/
-
-# R environment
-.Rhistory
-.RData
-.Rproj.user/
-
-# System file
-*.swp
-*.swo
-*~
-
-# Large-scale intermediate results
-
+# Large-scale intermediate results (Scanpy outputs)
 *.h5ad
+*.png
+*.pdf
+*.jpg
+*.svg
