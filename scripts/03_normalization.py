@@ -1,15 +1,26 @@
 import scanpy as sc
 import os
 
-TARGET_SUM  = 1e4
+# Standard scaling factor for single-cell library size normalization
+TARGET_SUM = 1e4
 
 def normalize_data(input_path: str, output_path: str) -> None:
+    # Load filered data, perform normalization and log transformation, then save
+
+    # Load data
     print(f"Loading data from: {input_path}")
     adata = sc.read_h5ad(input_path)
 
-    print("Applying log1p transformation to stablize variance...")
+    # Normalize total counts per cell
+    # Scale raw counts to a common target sum across all cells
+    print(f"Normalizing total counts to {TARGET_SUM} per cell...")
+    sc.pp.normalize_total(adata, target_sum=TARGET_SUM)
+
+    # Apply log(1+x) to handle zero inflation and stabilize variance
+    print("Applying log1p transformation to stabilize variance...")
     sc.pp.log1p(adata)
 
+    # Save results
     print(f"Saving normalized data to: {output_path}")
     adata.write_h5ad(output_path)
 
