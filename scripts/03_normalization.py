@@ -5,7 +5,7 @@ import os
 TARGET_SUM = 1e4
 
 def normalize_data(input_path: str, output_path: str) -> None:
-    # Load filered data, perform normalization and log transformation, then save
+    # Load filtered data, perform normalization and log transformation, then save
 
     # Load data
     print(f"Loading data from: {input_path}")
