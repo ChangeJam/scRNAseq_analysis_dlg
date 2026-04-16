@@ -30,3 +30,12 @@ __pycache__/
 *.pdf
 *.jpg
 *.svg
+
+# Temporary files
+temp_*.py
+debug_*.py
+test_*.py
+
+temp_*.ipynb
+debug_*.ipynb
+test_*.ipynb
