@@ -1,41 +1,50 @@
 # ============================================================
 # scRNA-seq Analysis Configuration
 # Sample: dlg (Drosophila melanogaster, FlyBase r6.49)
+# Tissue: Third instar larval eye-antennal disc
+# Context: Cell competition (dlg^m52, homozygous loser vs. wild-type winner)
 # ============================================================
 
 # --- 数据路径 ---
-data:
-  base_dir: "/data2/ChangeJam/scRNA_seq_scrib_CellCompetition/1.Expression/expressions"
-  sample: "dlg"
-  # 10x 标准三件套文件名
-  matrix: "matrix.mtx.gz"
-  barcodes: "barcodes.tsv.gz"
-  features: "features.tsv.gz"
-
-# --- 输出路径 ---
-output:
-  base_dir: "/home/test01/projects/scRNA_analysis/results"
-  figures_dir: "/home/test01/projects/scRNA_analysis/results/figures"
-  h5ad_dir: "/home/test01/projects/scRNA_analysis/results/data"
+paths:
+  # 10x Genomics CellRanger 输出的标准三件套所在目录
+  raw_data_dir: "/data2/ChangeJam/scRNA_seq_scrib_CellCompetition/1.Expression/expressions/dlg"
+  # 流程中间产物的 h5ad 文件存放目录
+  processed_dir: "/data2/ChangeJam/scRNA_seq_scrib_dlg/processed_data"
+  # 最终结果数据（如 DEG 表格等）
+  results_dir: "/data2/ChangeJam/scRNA_seq_scrib_dlg/results"
+  # 所有图表输出目录
+  figures_dir: "/data2/ChangeJam/scRNA_seq_scrib_dlg/figures"
 
 # --- 分析参数 ---
 params:
   species: "Drosophila_melanogaster"
   reference_genome: "FlyBase_r6.49"
 
-  # 质控参数（将在 02_qc_filtering.py 中使用）
+  # 质控参数（02_qc_filtering.py 使用）
   qc:
-    min_genes: 200        # 每个细胞至少检测到的基因数
-    min_cells: 3          # 每个基因至少在多少个细胞中表达
-    max_genes: 7000       # 每个细胞最多检测到的基因数（过滤双细胞/异常细胞）
-    # 果蝇没有线粒体基因的常规 MT 标记，后续会确认
-    max_pct_mt: 20        # 线粒体基因比例上限（暂定）
+    mad_thresh: 5
+    mt_genes:
+      - "FBgn0015553"
+      - "FBgn0015558"
+      - "FBgn0015561"
+      - "FBgn0015550"
 
-  # 降维参数
+  # 归一化参数（03_normalization.py 使用）
+  normalization:
+    target_sum: 10000
+
+  # 高可变基因参数（04_variable_genes.py 使用）
+  hvg:
+    n_top_genes: 2000
+    flavor: "seurat"
+
+  # 降维参数（05_pca.py & 06_neighbors.py 使用）
   dim_reduction:
-  n_pcs: 50               # PCA 保留的主成分数
-  n_neighbors: 15         # 构建 KNN 图的邻居数
+    n_pcs: 50
+    n_neighbors: 15
+    n_pcs_for_graph: 30
 
-  # 聚类参数
+  # 聚类参数（07_clustering.py 使用）
   clustering:
-  resolution: 0.8         # Leiden 聚类分辨率
+    resolution: 1.0         # Leiden 聚类分辨率
