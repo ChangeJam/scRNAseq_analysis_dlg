@@ -3,26 +3,35 @@
 
 """
 Perform Leiden clustering on the KNN graph.
+
 Assigns each cell to a cluster label based on graph connectivity density.
 """
 
 import scanpy as sc
-import os
+from pathlib import Path
+import sys
 
-# Controls clustering granularity by resolution = 1.0
-RESOLUTION = 1.0
+# --- 使 Python 能找到 src/ 包 ---
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
 
-def run_clustering(input_path: str, output_path: str) -> None:
+from src.config import get_config
+
+def main(config: dict) -> None:
     """Execute Leiden clustering and save the result."""
+
+    input_path = Path(config["paths"]["processed_dir"]) / "neighbor_graph.h5ad"
+    output_path = Path(config["paths"]["processed_dir"]) / "clustered.h5ad"
+    resolution = config["params"]["clustering"]["resolution"]
 
     print(f"Loading neighbor-graph data from: {input_path}")
     adata = sc.read_h5ad(input_path)
 
-    # Run Leiden clustering
-    print(f"Running Leiden clustering (resolution={RESOLUTION})...")
-    sc.tl.leiden(adata, resolution=RESOLUTION)
+    # ---运行Leiden聚类---
+    print(f"Running Leiden clustering (resolution={resolution})...")
+    sc.tl.leiden(adata, resolution=resolution)
 
-    # Show cluster summary
+    # ---聚类总结---
     print("Cluster distribution:")
     print(adata.obs['leiden'].value_counts().sort_index())
 
@@ -30,12 +39,6 @@ def run_clustering(input_path: str, output_path: str) -> None:
     adata.write_h5ad(output_path)
 
 if __name__ == "__main__":
-    DATA_DIR = "/data2/ChangeJam/scRNA_seq_scrib_dlg/raw_data"
-    INPUT_FILE = "neighbor_graph.h5ad"
-    OUTPUT_FILE = "clustered.h5ad"
-
-    input_path = os.path.join(DATA_DIR, INPUT_FILE)
-    output_path = os.path.join(DATA_DIR, OUTPUT_FILE)
-
-    run_clustering(input_path, output_path)
+    config = get_config()
+    main(config)
     print("Leiden clustering completed successfully.")
