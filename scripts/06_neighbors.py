@@ -1,23 +1,36 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+KNN graph calculation.
+
+Builds a KNN graph with PCA-transformed data.
+"""
 import scanpy as sc
-import os
+from pathlib import Path
+import sys
 
-# Each cell connects to its 15 nearest neighbors
-N_NEIGHBORS = 15
+# --- 使 Python 能找到 src/ 包 ---
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
 
-# Use the top 30 PCs for distance calculation
-N_PCS = 30
+from src.config import get_config
 
-def build_neighbor_graph(input_path: str, output_path: str) -> None:
+def main(config: dict) -> None:
     """Build a weighted KNN graph from PCA embeddings"""
+
+    input_path = Path(config["paths"]["processed_dir"]) / "pca_result.h5ad"
+    output_path = Path(config["paths"]["processed_dir"]) / "neighbor_graph.h5ad"
+    n_neighbors = config["params"]["dim_reduction"]["n_neighbors"]
+    n_pcs = config["params"]["dim_reduction"]["n_pcs"]
 
     print(f"Loading PCA-transformed data from: {input_path}")
     adata = sc.read_h5ad(input_path)
 
-    # Build the neighbor graph
-    print(f"Building KNN graph (n_neighbors={N_NEIGHBORS}, n_pcs={N_PCS})...")
-    sc.pp.neighbors(adata, n_neighbors=N_NEIGHBORS, n_pcs=N_PCS)
+    # ---构建KNN图---
+    print(f"Building KNN graph (n_neighbors={n_neighbors}, n_pcs={n_pcs})...")
+    sc.pp.neighbors(adata, n_neighbors=n_neighbors, n_pcs=n_pcs)
 
-    # Verify graph construction
+    # ---验证图像构建---
     print(f"Distances matrix shape: {adata.obsp['distances'].shape}")
     print(f"Connectivities matrix shape: {adata.obsp['connectivities'].shape}")
 
@@ -25,12 +38,6 @@ def build_neighbor_graph(input_path: str, output_path: str) -> None:
     adata.write_h5ad(output_path)
 
 if __name__ == "__main__":
-    DATA_DIR = "/data2/ChangeJam/scRNA_seq_scrib_dlg/raw_data"
-    INPUT_FILE = "pca_result.h5ad"
-    OUTPUT_FILE = "neighbor_graph.h5ad"
-
-    input_path = os.path.join(DATA_DIR, INPUT_FILE)
-    output_path = os.path.join(DATA_DIR, OUTPUT_FILE)
-
-    build_neighbor_graph(input_path, output_path)
+    config = get_config()
+    main(config)
     print("Neighbor graph construction completed successfully.")
