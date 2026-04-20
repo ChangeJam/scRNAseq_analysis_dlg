@@ -95,6 +95,23 @@ def main(config: dict) -> None:
 
     print(f"n_obs(after filter): {adata.n_obs}")
 
+    # ---画QC小提琴图和散点图（过滤后）---
+    sc.pl.violin(
+    adata,
+    ['n_genes_by_counts', 'total_counts', 'pct_counts_mt'],
+    jitter=0.4,
+    multi_panel=True,
+    save='_after_filter.pdf'
+    )
+
+    sc.pl.scatter(
+    adata, 
+    x='total_counts', 
+    y='n_genes_by_counts', 
+    color='pct_counts_mt',
+    save='_after_filter.pdf'
+    )
+
     # ---保存过滤后的数据---
     output_path = processed_dir / "filtered_data.h5ad"
     adata.write_h5ad(output_path)
