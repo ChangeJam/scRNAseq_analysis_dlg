@@ -73,7 +73,7 @@ def main(config: dict) -> None:
     ['n_genes_by_counts', 'total_counts', 'pct_counts_mt'],
     jitter=0.4,
     multi_panel=True,
-    save='_before_filter.pdf'
+    save='_before_filter.png'
     )
 
     sc.pl.scatter(
@@ -81,7 +81,7 @@ def main(config: dict) -> None:
     x='total_counts', 
     y='n_genes_by_counts', 
     color='pct_counts_mt',
-    save='_before_filter.pdf'
+    save='_before_filter.png'
     )
 
     # ---MAD离群值过滤---
@@ -101,7 +101,7 @@ def main(config: dict) -> None:
     ['n_genes_by_counts', 'total_counts', 'pct_counts_mt'],
     jitter=0.4,
     multi_panel=True,
-    save='_after_filter.pdf'
+    save='_after_filter.png'
     )
 
     sc.pl.scatter(
@@ -109,7 +109,7 @@ def main(config: dict) -> None:
     x='total_counts', 
     y='n_genes_by_counts', 
     color='pct_counts_mt',
-    save='_after_filter.pdf'
+    save='_after_filter.png'
     )
 
     # ---保存过滤后的数据---
