@@ -31,6 +31,13 @@ __pycache__/
 *.jpg
 *.svg
 
+# Except the directory figures/README_fig  
+!figures/README_fig/*.png  
+!figures/README_fig/*.jpg  
+!figures/README_fig/*.jpeg  
+!figures/README_fig/*.svg  
+!figures/README_fig/*.pdf
+
 # Temporary files
 temp_*.py
 debug_*.py
