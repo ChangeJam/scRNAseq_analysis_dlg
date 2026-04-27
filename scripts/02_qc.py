@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Quality control: filter cells using MAD-based outlier detection.
+Quality control: filter cells using MAD-based outlier detection and Scrublet doublet removal.
 
 Reads raw data, calculates QC metrics, removes outlier cells,
 and saves filtered data.
@@ -9,6 +9,7 @@ and saves filtered data.
 
 import scanpy as sc
 import numpy as np
+import scrublet as scr
 from pathlib import Path
 import sys
 
@@ -43,6 +44,44 @@ def mad_outlier(adata, metric, n_thresh=5):
     #Return a Boolean array marking cells that exceed the bounds as True
     return (data > upper_bound) | (data < lower_bound)
 
+def detect_doublet(
+        adata,
+        expected_doublet_rate: float=0.08,
+        random_state: int=0
+) -> np.ndarray:
+    """Run doublet detection on raw count data."""
+
+    # ---初始化Scrublet---
+    scrub = scr.Scrublet(
+        adata.X,
+        expected_doublet_rate=expected_doublet_rate,
+        random_state=random_state
+    )
+
+    # ---运行双胞检测---
+    doublet_scores, predicted_doublets = scrub.scrub_doublets()
+
+    # ---结果存入adata.obs---
+    adata.obs["doublet_score"] = doublet_scores
+    adata.obs["predicted_doublet"] = predicted_doublets
+
+
+    # ---打印摘要---
+    print(f"[Scrublet] expected doublet rate: {expected_doublet_rate:.2%}")
+    print(f"[Scrublet] detected doublet rate: {np.mean(predicted_doublets):.2%}")
+    print(f"[Scrublet] doublets predicted: {np.sum(predicted_doublets)}")
+
+    # ---保存score的violin图---
+    sc.pl.violin(
+        adata,
+        keys=["doublet_score"],
+        groupby="predicted_doublet",
+        jitter=0.4,
+        save="_doublet_score.png"
+    )
+
+    return predicted_doublets
+    
 
 def main(config: dict) -> None:
     """Run QC filtering pipeline"""
@@ -53,6 +92,8 @@ def main(config: dict) -> None:
     # ---参数---
     mt_genes = config["params"]["qc"]["mt_genes_complete"]
     mad_thresh = config["params"]["qc"]["mad_thresh"]
+    expected_doublet_rate = config["params"]["qc"]["expected_doublet_rate"]
+    scrublet_random_state = config["params"]["qc"]["scrublet_random_state"]
 
     # ---读取数据---
     input_path = processed_dir / "raw_data.h5ad"
@@ -84,6 +125,14 @@ def main(config: dict) -> None:
     save='_before_filter.png'
     )
 
+    # ---Scrublet双胞检测---
+    print("\n---Running Scrublet doublet detection---")
+    predicted_doublets = detect_doublet(
+        adata,
+        expected_doublet_rate=expected_doublet_rate,
+        random_state=scrublet_random_state
+    )
+
     # ---MAD离群值过滤---
     print(f"n_obs(before filter): {adata.n_obs}")
 
@@ -91,7 +140,10 @@ def main(config: dict) -> None:
     outlier_counts = mad_outlier(adata, "total_counts", n_thresh=mad_thresh)
     outlier_mt = mad_outlier(adata, "pct_counts_mt", n_thresh=mad_thresh)
 
-    adata = adata[~(outlier_genes | outlier_counts | outlier_mt), :].copy()
+    # ---合并MAD outlier和scrublet doublet
+    outlier_mask = outlier_genes | outlier_mt | outlier_counts |predicted_doublets
+
+    adata = adata[~outlier_mask, :].copy()
 
     print(f"n_obs(after filter): {adata.n_obs}")
 
@@ -118,8 +170,7 @@ def main(config: dict) -> None:
     print(f"QC done, filtered data saved to: {output_path}")
 
 
-
 if __name__ == "__main__":
     config = get_config()
     main(config)
-    print("Step 02 completed: QC filtered done.")
+    print("Step 02 completed: QC filtered done (MAD + Scrublet).")

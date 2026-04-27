@@ -69,6 +69,9 @@ params:
       - 'FBgn0013708'
       - 'FBgn0013688'
       - 'FBgn0013696'
+    expected_doublet_rate: 0.08
+    scrublet_random_state: 0
+    
 
   # 归一化参数（03_normalization.py 使用）
   normalization:
