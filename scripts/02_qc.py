@@ -7,6 +7,7 @@ Reads raw data, calculates QC metrics, removes outlier cells,
 and saves filtered data.
 """
 
+import pandas as pd
 import scanpy as sc
 import numpy as np
 import scrublet as scr
@@ -63,7 +64,7 @@ def detect_doublet(
 
     # ---结果存入adata.obs---
     adata.obs["doublet_score"] = doublet_scores
-    adata.obs["predicted_doublet"] = predicted_doublets
+    adata.obs["predicted_doublet"] = pd.Categorical(predicted_doublets)
 
 
     # ---打印摘要---
