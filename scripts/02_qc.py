@@ -51,7 +51,7 @@ def main(config: dict) -> None:
     figures_dir = Path(config["paths"]["figures_dir"])
 
     # ---参数---
-    mt_genes = config["params"]["qc"]["mt_genes"]
+    mt_genes = config["params"]["qc"]["mt_genes_complete"]
     mad_thresh = config["params"]["qc"]["mad_thresh"]
 
     # ---读取数据---
